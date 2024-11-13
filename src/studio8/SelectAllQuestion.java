@@ -1,48 +1,56 @@
 package studio8;
 
 public class SelectAllQuestion extends MultipleChoiceQuestion {
+	private String[] choices; 
 
-	public SelectAllQuestion(String prompt, String answer, String[] choices) {
-		//Hint: 1 point per choice
-		//FIXME
-	}
-	
-	public int checkAnswer(String givenAnswer) {
-		//FIXME Should return partial credit (if earned)!
-		return 0;
-	}
+    public SelectAllQuestion(String prompt, String answer, String[] choices) {
+        // Call superclass constructor and set 1 point per choice
+        super(prompt, answer, choices.length, choices);
+        this.choices = choices; 
+    }
 
-	private int findMissingCorrectAnswers(String givenAnswer) {
-		String answer = this.getAnswer();
-		//how many letters are in the correct answer but not the given answer?
-		int incorrectValues = findMissingCharacters(givenAnswer, answer);
-		return incorrectValues;
-	}
-	
-	private int findIncorrectGivenAnswers(String givenAnswer) {
-		String answer = this.getAnswer();
-		//how many letters are in the given answer but not the correct answer?
-		int incorrectValues = findMissingCharacters(answer, givenAnswer);
-		return incorrectValues;
-	}
+    @Override
+    public int checkAnswer(String givenAnswer) {
+        int points = 0;
 
-	/*
-	 * Returns the number of characters in toCheck that are missing from the
-	 * baseString. For example findMissingValues("hi", "hoi") would return 1,
-	 * 'o' is not in the baseString.
-	 * 
-	 * This method is marked static as it does not depend upon any instance variables
-	 */
-	private static int findMissingCharacters(String baseString, String toCheck) {
-		int missingValues = 0;
-		for(int i = 0; i < toCheck.length(); i++) {
-			char characterToLocate = toCheck.charAt(i);
-			if(baseString.indexOf(characterToLocate) == -1) { //not in baseString
-				missingValues++;
-			}
-		}
-		return missingValues;
-	}	
+        // Check for correct and incorrect answers
+        int missingCorrectAnswers = findMissingCorrectAnswers(givenAnswer);
+        int incorrectGivenAnswers = findIncorrectGivenAnswers(givenAnswer);
+
+        // Calculate points by subtracting penalties from total possible points
+        points = getPoints() - missingCorrectAnswers - incorrectGivenAnswers;
+
+        // Ensure points do not go negative
+        return Math.max(points, 0);
+    }
+
+    // Find how many correct answers are missing from the given answer
+    private int findMissingCorrectAnswers(String givenAnswer) {
+        String answer = this.getAnswer();
+        return findMissingCharacters(givenAnswer, answer);
+    }
+
+    // Find how many incorrect answers are present in the given answer
+    private int findIncorrectGivenAnswers(String givenAnswer) {
+        String answer = this.getAnswer();
+        return findMissingCharacters(answer, givenAnswer);
+    }
+
+    /*
+     * Returns the number of characters in toCheck that are missing from the
+     * baseString. For example findMissingCharacters("hi", "hoi") would return 1,
+     * since 'o' is not in the baseString.
+     */
+    private static int findMissingCharacters(String baseString, String toCheck) {
+        int missingValues = 0;
+        for (int i = 0; i < toCheck.length(); i++) {
+            char characterToLocate = toCheck.charAt(i);
+            if (baseString.indexOf(characterToLocate) == -1) { // Character not in baseString
+                missingValues++;
+            }
+        }
+        return missingValues;
+    }	
 	
 	public static void main(String[] args) {
 		String[] choices = {"instance variables", "git", "methods", "eclipse"};
